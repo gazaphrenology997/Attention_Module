@@ -18,6 +18,7 @@ This repository can also be used by beginners to learn the attention mechanism m
 | ECA | Efficient Channel Attention |
 | ELA | Efficient Local Attention |
 | EMA | Exponential Moving Average Attention |
+| DANet | Dual Attention Network |
 | GAM | Global Attention Module |
 | SCSA | Semantic-Channel-Spatial Attention |
 | SE | Squeeze-and-Excitation Networks |
