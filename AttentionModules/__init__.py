@@ -6,6 +6,7 @@ This file re-exports commonly used attention blocks so users can import them via
 """
 
 from .A2 import A2
+from .DANet import DANet
 from .ACmix import ACmix
 from .BAM import BAM
 from .CA import CA
@@ -25,6 +26,7 @@ from .TripletAttention import TripletAttention
 
 __all__ = [
 	"A2",
+	"DANet",
 	"ACmix",
 	"BAM",
 	"CA",
