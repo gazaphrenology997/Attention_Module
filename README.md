@@ -15,6 +15,7 @@ This repository can also be used by beginners to learn the attention mechanism m
 | CA | Coordinate Attention |
 | CBAM | Convolutional Block Attention Module |
 | CCAM | Criss-Cross Attention Module |
+| DETRAttention | DETR Multi-Head Attention (Self-Attention / Cross-Attention) |
 | ECA | Efficient Channel Attention |
 | ELA | Efficient Local Attention |
 | EMA | Exponential Moving Average Attention |
@@ -25,6 +26,7 @@ This repository can also be used by beginners to learn the attention mechanism m
 | SimAM | Simple Attention Module |
 | SK | Selective Kernel Networks |
 | SLAM | Spatial-LSTM Attention Module |
+| SwinAttention | Swin Transformer Window Attention (W-MSA / SW-MSA) |
 | TripletAttention | Triplet Attention |
 
 ## Usage

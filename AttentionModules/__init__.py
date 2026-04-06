@@ -23,6 +23,8 @@ from .SimAM import SimAM
 from .SK import SK
 from .SLAM import SLAM
 from .TripletAttention import TripletAttention
+from .SwinAttention import SwinAttention
+from .DETRAttention import DETRAttention
 
 __all__ = [
 	"A2",
@@ -43,4 +45,6 @@ __all__ = [
 	"SK",
 	"SLAM",
 	"TripletAttention",
+	"SwinAttention",
+	"DETRAttention",
 ]
