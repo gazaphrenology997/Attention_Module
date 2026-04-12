@@ -25,6 +25,7 @@ from .SLAM import SLAM
 from .TripletAttention import TripletAttention
 from .SwinAttention import SwinAttention
 from .DETRAttention import DETRAttention
+from .DeformableAttention import DeformableAttention
 
 __all__ = [
 	"A2",
@@ -47,4 +48,5 @@ __all__ = [
 	"TripletAttention",
 	"SwinAttention",
 	"DETRAttention",
+	"DeformableAttention",
 ]
